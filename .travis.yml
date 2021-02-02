@@ -1,0 +1,30 @@
+language: python
+sudo: false
+
+python:
+  - "3.7"
+  - "3.8"
+
+install:
+  - pip install coverage
+  - pip install coveralls
+  - pip install pyramid==1.9.4
+  - |
+    if [[ $TRAVIS_PYTHON_VERSION == '2.7' ]]; then
+        pip install repoze.zcml==0.4
+        pip install repoze.workflow==0.6.1
+    else
+        pip install repoze.zcml==1.1
+        pip install repoze.workflow==1.1
+    fi
+  - pip install https://github.com/bluedynamics/cone.ugm/archive/master.zip
+  - pip install https://github.com/bluedynamics/cone.app/archive/master.zip
+  - pip install -e .[test]
+
+script:
+  - python -m cone.firebase.tests
+  - coverage run --source src/cone/firebase -m cone.firebase.tests
+  - coverage report
+
+after_success:
+  - coveralls
