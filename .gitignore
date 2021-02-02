@@ -1,3 +1,4 @@
 *.pyc
+/.eggs/
 /dist/
 /src/cone.firebase.egg-info/
