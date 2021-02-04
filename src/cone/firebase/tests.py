@@ -1,22 +1,61 @@
 from cone.app import testing
+from cone import firebase
 from node.tests import NodeTestCase
+import json
+import os
+import shutil
 import sys
+import tempfile
 import unittest
+
+
+service_account_json = {
+    'auth_provider_x509_cert_url': 'https://www.googleapis.com/oauth2/v1/certs',
+    'auth_uri': 'https://accounts.google.com/o/oauth2/auth',
+    'client_email': 'firebase-adminsdk-foo@example.iam.gserviceaccount.com',
+    'client_id': 'xxx',
+    'client_x509_cert_url': 'https://www.googleapis.com/robot/v1/metadata/x509/firebase-adminsdk-foo@example.iam.gserviceaccount.com',
+    'private_key': '-----BEGIN PRIVATE KEY-----\nxxx\n-----END PRIVATE KEY-----\n',
+    'private_key_id': 'xxx',
+    'project_id': 'example',
+    'token_uri': 'https://oauth2.googleapis.com/token',
+    'type': 'service_account'
+}
 
 
 class FirebaseLayer(testing.Security):
 
     def make_app(self, **kw):
         super(FirebaseLayer, self).make_app(**{
-            'cone.plugins': 'cone.firebase'
+            'cone.plugins': 'cone.firebase',
+            'firebase.web_api_key': 'xxxxxxxxxx',
+            'firebase.service_account_json_file': os.path.join(
+                self.tempdir,
+                'service_account.json'
+            )
         })
 
+    def setUp(self, args=None):
+        self.tempdir = tempfile.mkdtemp()
+        with open(os.path.join(self.tempdir, 'service_account.json'), 'w') as f:
+            f.write(json.dumps(service_account_json))
+        super(FirebaseLayer, self).setUp()
 
-class TestFirebaseTile(NodeTestCase):
+    def tearDown(self):
+        super(FirebaseLayer, self).tearDown()
+        shutil.rmtree(self.tempdir)
+
+
+class TestFirebase(NodeTestCase):
     layer = FirebaseLayer()
 
-    def test_foo(self):
-        pass
+    def test_config(self):
+        self.assertIsInstance(firebase.config, firebase.FirebaseConfig)
+        self.assertEqual(firebase.config.web_api_key, 'xxxxxxxxxx')
+        self.assertEqual(
+            firebase.config.service_account_json,
+            service_account_json
+        )
 
 
 def run_tests():

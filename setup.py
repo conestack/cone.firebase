@@ -47,7 +47,9 @@ setup(
     zip_safe=False,
     install_requires=[
         'setuptools',
-        'cone.app'
+        'cone.app',
+        'requests',
+        'firebase_admin'
     ],
     extras_require=dict(test=['zope.testrunner']),
     tests_require=['zope.testrunner'],

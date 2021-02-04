@@ -16,6 +16,30 @@
 This package provides a firebase integration in to cone.app.
 
 
+Installation
+------------
+
+Include ``cone.firebase`` to install dependencies in your application's
+``setup.py``.
+
+
+Configuration
+-------------
+
+Adopt your application config ini file to define firebase related API keys.
+
+.. code-block:: ini
+
+    [app:my_app]
+    use = egg:cone.app#main
+
+    cone.plugins =
+        cone.firebase
+
+    firebase.web_api_key = xxx
+    firebase.service_account_json_file = path/to/service_account.json
+
+
 Contributors
 ============
 
