@@ -1,5 +1,6 @@
-from cone.app import testing
 from cone import firebase
+from cone.app import testing
+from cone.firebase import api
 from cone.firebase.testing import firebase_admin
 from node.tests import NodeTestCase
 import json
@@ -51,9 +52,11 @@ class FirebaseLayer(testing.Security):
     def patch_modules(self):
         self.firebase_admin_orgin = firebase.firebase_admin
         firebase.firebase_admin = firebase_admin
+        api.firebase_admin = firebase_admin
 
     def unpatch_modules(self):
         firebase.firebase_admin = self.firebase_admin_orgin
+        api.firebase_admin = self.firebase_admin_orgin
 
 
 class TestFirebase(NodeTestCase):
