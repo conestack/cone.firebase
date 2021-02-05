@@ -37,12 +37,12 @@ class FirebaseAuthenticator:
 
         res = sign_in_with_email_and_password(uid, pwd, cone.firebase.config.web_api_key)
 
+        ugm = ugm_backend.ugm
+        users = ugm.users
+
         if res.get("kind") == 'identitytoolkit#VerifyPasswordResponse':
-            ugm = ugm_backend.ugm
-            users = ugm.users
             id = res["localId"]
             if id not in users:
-                # TODO: creation shall take place in security.authenticate()
                 users.create(
                     id,
                     login="email",
@@ -59,6 +59,6 @@ class FirebaseAuthenticator:
                 users.on_authenticated(res["localId"])
             # user.passwd(None, pwd)  # it is to decide if we need local pwds
             return res
-        # else:
-        #     # if not found in firebase login locally
-        #     return self.users.authenticate(uid, pwd)
+        else:
+            # if not found in firebase login locally
+            return users.authenticate(uid, pwd)

@@ -28,8 +28,15 @@ service_account_json = {
 }
 
 def fake_sign_in_with_email_and_password(email, password, api_key, return_secure_token = True):
-    res = firebase_admin.get_user_by_email(email)
-    res["kind"] = 'identitytoolkit#VerifyPasswordResponse'
+    try:
+        res = firebase_admin.get_user_by_email(email)
+        res["kind"] = 'identitytoolkit#VerifyPasswordResponse'
+    except KeyError:
+        res = {'error': {'code': 400,
+            'message': 'INVALID_EMAIL',
+            'errors': [{'message': 'INVALID_EMAIL',
+                'domain': 'global',
+                'reason': 'invalid'}]}}
 
     return res
 
@@ -80,7 +87,7 @@ class FirebaseLayer(UGMLayer):
                     email="donald_local@duck.com",
                     fullname="Donald Duck local",
                 )
-
+        assert "donald_local" in users
 
     def tearDown(self):
         self.unpatch_modules()
@@ -113,13 +120,32 @@ class TestFirebase(NodeTestCase):
         )
 
     def test_firebase_authentication(self):
+        """
+        Tests a login situation where only a firebase user
+        exists and after authentication is added to the
+        local UGM database
+        """
         from cone.app import security
         users = ugm_backend.ugm.users
         request = self.layer.new_request()
         security.AUTHENTICATOR = "firebase"
-        aut=security.authenticate(request, "donald@duck.com", "duck")
+        aut = security.authenticate(request, "donald@duck.com", "daisy1")
 
         self.assertTrue("donald" in users)
+
+    def test_local_authentication(self):
+        """
+        Tests a local only login for the situation that a certain user is
+        only given locally and login should the fall back to standard auth
+        """
+        from cone.app import security
+        users = ugm_backend.ugm.users
+        self.assertTrue("donald_local" in users)
+
+        request = self.layer.new_request()
+        security.AUTHENTICATOR = "firebase"
+        aut = security.authenticate(request, "donald_local", "daisy1")
+
 
 
 def run_tests():
