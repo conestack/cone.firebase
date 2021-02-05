@@ -131,6 +131,7 @@ class TestFirebase(NodeTestCase):
         security.AUTHENTICATOR = "firebase"
         aut = security.authenticate(request, "donald@duck.com", "daisy1")
 
+        # during the authentication the user should be added to UGM
         self.assertTrue("donald" in users)
 
     def test_local_authentication(self):

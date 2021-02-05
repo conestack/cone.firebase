@@ -1,10 +1,16 @@
+import json
+import requests
 from zope.interface import implementer
 from cone.app.interfaces import IAuthenticator
 from cone.app import ugm_backend, security
 import cone.firebase
 
+REST_API_URL_LOGIN = f"https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword"
+
+
 def sign_in_with_email_and_password(email, password, api_key, return_secure_token = True):
     """
+    borrowed from here:
     https://github.com/billydh/python-firebase-admin-sdk-demo/blob/master/sign_in_with_email_and_password.py
     """
 
@@ -15,14 +21,15 @@ def sign_in_with_email_and_password(email, password, api_key, return_secure_toke
             "returnSecureToken": return_secure_token
         })
     except Exception as ex:
-        logger.error(f"error encoding email: {email} and password: {password}")
+        cone.firebase.logger.error(f"error encoding email: {email} and password: {password}")
         raise
 
-    r = requests.post(REST_API_URL,
+    r = requests.post(REST_API_URL_LOGIN,
                       params={"key": api_key},
                       data=payload)
 
     return r.json()
+
 
 @implementer(IAuthenticator)
 class FirebaseAuthenticator:
