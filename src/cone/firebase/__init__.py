@@ -1,4 +1,6 @@
 from cone.app import main_hook
+from cone.app.interfaces import IAuthenticator
+from cone.firebase.authentication import FirebaseAuthenticator
 import firebase_admin
 import json
 import logging
@@ -40,3 +42,5 @@ def initialize_firebase_admin():
 def initialize_firebase(config, global_config, settings):
     load_firebase_config(settings)
     initialize_firebase_admin()
+    config.registry.registerUtility(FirebaseAuthenticator, IAuthenticator, "firebase")
+    
