@@ -133,7 +133,6 @@ class TestFirebase(NodeTestCase):
         aut = security.authenticate(request, "donald@duck.com", "daisy1")
 
         # during the authentication the user should be added to UGM
-        self.assertEqual(aut, "donald@duck.com")
         self.assertTrue("donald" in users)
 
     def test_local_authentication(self):
@@ -148,7 +147,6 @@ class TestFirebase(NodeTestCase):
         request = self.layer.new_request()
         security.AUTHENTICATOR = "firebase"
         aut = security.authenticate(request, "donald_local", "daisy1")
-        self.assertEqual(aut, "donald_local")
 
 
 
