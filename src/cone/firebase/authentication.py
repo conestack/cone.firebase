@@ -16,8 +16,8 @@ def sign_in_with_email_and_password(email, password, api_key, return_secure_toke
 
     try:
         payload = json.dumps({
-            "email": email,
-            "password": password,
+            "email": email or "",
+            "password": password or "",
             "returnSecureToken": return_secure_token
         })
     except Exception as ex:
@@ -35,11 +35,12 @@ def sign_in_with_email_and_password(email, password, api_key, return_secure_toke
 class FirebaseAuthenticator:
 
     @classmethod 
-    def authenticate(cls, uid, pwd):
+    def authenticate(cls, uid: str, pwd: str) -> str:
         """
         does firebase authentication and in the case of success
         checks if the uid exists in self.users, if not it creates the user there
         when fb login is unsuccessful delegates it to
+        :return: login of logged in user
         """
 
         res = sign_in_with_email_and_password(uid, pwd, cone.firebase.config.web_api_key)
@@ -65,7 +66,9 @@ class FirebaseAuthenticator:
             if hasattr(users, "on_authenticated"):
                 users.on_authenticated(res["localId"])
             # user.passwd(None, pwd)  # it is to decide if we need local pwds
-            return res
+            return uid
         else:
             # if not found in firebase login locally
-            return users.authenticate(uid, pwd)
+            auth = users.authenticate(uid, pwd)
+            if auth:
+                return uid
