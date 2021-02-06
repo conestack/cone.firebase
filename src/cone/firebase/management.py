@@ -11,7 +11,7 @@ import cone.firebase
 
 @classhandler.handler(UserCreatedEvent)
 def on_user_created(event):
-    user = event.user
+    user = event.principal
     email = user.attrs["mail"]
     uid = user.attrs["id"]
     if email:
@@ -35,7 +35,7 @@ def on_user_created(event):
 
 @classhandler.handler(UserModifiedEvent)
 def on_user_modified(event):
-    user = event.user
+    user = event.principal
     email = user.attrs["mail"]
     uid = user.attrs["id"]
     try:
@@ -68,7 +68,7 @@ def on_user_modified(event):
 
 @classhandler.handler(UserDeletedEvent)
 def on_user_deleted(event):
-    user = event.user
+    user = event.principal
     uid = user.attrs["id"]
     try:
         fbuser = auth.get_user(uid)
