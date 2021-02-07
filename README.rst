@@ -36,6 +36,8 @@ Adopt your application config ini file to define firebase related API keys.
     cone.plugins =
         cone.firebase
 
+    cone.authenticator = firebase
+
     firebase.web_api_key = xxx
     firebase.service_account_json_file = path/to/service_account.json
 
