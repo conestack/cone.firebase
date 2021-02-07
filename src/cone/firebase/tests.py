@@ -1,6 +1,6 @@
 from cone import firebase
-from cone.app import testing
 from cone.firebase import api
+from cone.firebase.management import register_device_token_for_user, get_device_tokens_for_user
 from cone.firebase.testing import firebase_admin
 from cone.firebase import authentication
 from cone.ugm.testing import UGMLayer, ugm_config, localmanager_config
@@ -13,7 +13,7 @@ import sys
 import tempfile
 import unittest
 
-
+from cone.firebase.management import FIREBASE_DEVICE_TOKENS
 service_account_json = {
     'auth_provider_x509_cert_url': 'https://www.googleapis.com/oauth2/v1/certs',
     'auth_uri': 'https://accounts.google.com/o/oauth2/auth',
@@ -78,7 +78,7 @@ class FirebaseLayer(UGMLayer):
             f.write(json.dumps(service_account_json))
         super(FirebaseLayer, self).setUp()
         # create a firebase only user
-        firebase_admin.create_user(id="donald", email="donald@duck.com")
+        firebase_admin.create_user(id="donald", login="email", email="donald@duck.com")
         # create a local only user
         users = ugm_backend.ugm.users
         users.create(
@@ -148,6 +148,14 @@ class TestFirebase(NodeTestCase):
         security.AUTHENTICATOR = "firebase"
         aut = security.authenticate(request, "donald_local", "daisy1")
 
+    def test_management(self):
+        """
+        test management of device tokens for firebase messaging
+        """
+        users = ugm_backend.ugm.users
+
+        register_device_token_for_user("donald", "123456")
+        self.assertTrue("123456" in get_device_tokens_for_user("donald"))
 
 
 def run_tests():

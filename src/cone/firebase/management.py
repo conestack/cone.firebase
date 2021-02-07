@@ -1,4 +1,4 @@
-from typing import Tuple
+from typing import Tuple, List
 
 from cone.app import ugm_backend
 from cone.ugm.events import UserCreatedEvent, UserModifiedEvent, UserDeletedEvent
@@ -7,6 +7,8 @@ from firebase_admin.auth import UserNotFoundError
 from pyramid.security import remember
 from zope.event import classhandler
 import cone.firebase
+
+FIREBASE_DEVICE_TOKENS = "firebase_device_tokens"
 
 
 @classhandler.handler(UserCreatedEvent)
@@ -100,9 +102,38 @@ def authenticate_with_id_token(request, id_token: str) -> Tuple[str, str]:
             email=res["email"],
             fullname=res.get("name", ""),
             email_verified=res["email_verified"],
-            phone=res.get("phone_number",""),
+            phone=res.get("phone_number", ""),
             idtoken=id_token
         )
         cone.firebase.logger.info(f"user with {user_id} successfully created")
 
     return user_id, remember(request, user_id)
+
+
+def register_device_token_for_user(login: str, token: str):
+    """
+    registers a device token for a given user
+    :param login: email or uid
+    :param token: firebase device token
+    """
+    users = ugm_backend.ugm.users
+    if login not in users:
+        uid = users.id_for_login(login)
+    else:
+        uid = login
+
+    user = users[uid]
+    tokens = user.attrs.get(FIREBASE_DEVICE_TOKENS, []) or []
+    if token not in tokens:
+        user.attrs[FIREBASE_DEVICE_TOKENS] = list(tokens) + [token]
+
+
+def get_device_tokens_for_user(login: str) -> List[str]:
+    users = ugm_backend.ugm.users
+    if login not in users:
+        uid = users.id_for_login(login)
+    else:
+        uid = login
+
+    user = users[uid]
+    return user.attrs.get(FIREBASE_DEVICE_TOKENS, [])
