@@ -43,7 +43,3 @@ def initialize_firebase(config, global_config, settings):
     load_firebase_config(settings)
     initialize_firebase_admin()
     config.registry.registerUtility(FirebaseAuthenticator, IAuthenticator, "firebase")
-    # TODO: should be configurable via settings
-    from cone.app import security
-    security.AUTHENTICATOR = "firebase"
-    
