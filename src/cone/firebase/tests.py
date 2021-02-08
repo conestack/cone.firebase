@@ -2,7 +2,7 @@ from cone import firebase
 from cone.firebase import api
 from cone.firebase.api import register_device_token_for_user, get_device_tokens_for_user, send_message_to_user
 from cone.firebase.testing import firebase_admin
-from cone.firebase.testing.firebase_admin import messaging as fbmessaging
+from cone.firebase.testing.firebase_admin import messaging as fb_fake_messaging
 from cone.firebase import messaging
 
 from cone.firebase import authentication
@@ -104,7 +104,7 @@ class FirebaseLayer(UGMLayer):
     def patch_modules(self):
         self.firebase_admin_orgin = firebase.firebase_admin
         firebase.firebase_admin = firebase_admin
-        firebase.firebase_admin.messaging = fbmessaging
+        firebase.firebase_admin.messaging = fb_fake_messaging
         api.firebase_admin = firebase_admin
         messaging.firebase_admin = firebase_admin
         self.sign_in_with_email_and_password = authentication.sign_in_with_email_and_password
@@ -166,23 +166,23 @@ class TestFirebase(NodeTestCase):
 
     def test_send_message(self):
         registration_token = EXAMPLE_DEVICE_TOKEN
-        message = fbmessaging.Message(
+        message = fb_fake_messaging.Message(
             data={
                 'score': '850',
                 'time': '2:45',
             },
             token=registration_token,
         )
-        res = fbmessaging.send(message, dry_run=True)
+        res = fb_fake_messaging.send(message, dry_run=True)
         assert res == 'projects/willholzen-293208/messages/0:1612781129630326%d758af2bf9fd7ecd'
 
     def test_send_multicast_message(self):
         registration_tokens = [EXAMPLE_DEVICE_TOKEN]
-        message = fbmessaging.MulticastMessage(
+        message = fb_fake_messaging.MulticastMessage(
             data={'score': '850', 'time': '2:45'},
             tokens=registration_tokens,
         )
-        res = fbmessaging.send_multicast(message)
+        res = fb_fake_messaging.send_multicast(message)
 
     def test_send_message_to_user(self):
         data = {'score': '850', 'time': '2:45'}
