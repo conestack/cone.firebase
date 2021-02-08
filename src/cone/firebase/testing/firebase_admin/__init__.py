@@ -1,6 +1,7 @@
 # faking the firebase auth api
 
-from . import credentials  # noqa
+from . import credentials # noqua
+from . import messaging   # noqa
 
 _apps = None
 

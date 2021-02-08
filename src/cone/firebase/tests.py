@@ -1,7 +1,10 @@
 from cone import firebase
 from cone.firebase import api
-from cone.firebase.management import register_device_token_for_user, get_device_tokens_for_user
+from cone.firebase.api import register_device_token_for_user, get_device_tokens_for_user, send_message_to_user
 from cone.firebase.testing import firebase_admin
+from cone.firebase.testing.firebase_admin import messaging as fbmessaging
+from cone.firebase import messaging
+
 from cone.firebase import authentication
 from cone.ugm.testing import UGMLayer, ugm_config, localmanager_config
 from cone.app.ugm import ugm_backend
@@ -12,6 +15,8 @@ import shutil
 import sys
 import tempfile
 import unittest
+
+EXAMPLE_DEVICE_TOKEN = "dtt9cGrcSXicn8mW0tvcTQ:APA91bHlcidOIQwXoXVa3p22fBDvgeu1kUwElEKpdVcliODGAbtjviOV7Ruls2h__enWF1P_gZApIVOOfHKGlTft0vWuzzwGapsXbZIIH9s7-rbpilV4Hu_JzoLBYAwpCoP3Nkf3foPv"
 
 from cone.firebase.management import FIREBASE_DEVICE_TOKENS
 service_account_json = {
@@ -99,7 +104,9 @@ class FirebaseLayer(UGMLayer):
     def patch_modules(self):
         self.firebase_admin_orgin = firebase.firebase_admin
         firebase.firebase_admin = firebase_admin
+        firebase.firebase_admin.messaging = fbmessaging
         api.firebase_admin = firebase_admin
+        messaging.firebase_admin = firebase_admin
         self.sign_in_with_email_and_password = authentication.sign_in_with_email_and_password
         authentication.sign_in_with_email_and_password = fake_sign_in_with_email_and_password
 
@@ -154,8 +161,33 @@ class TestFirebase(NodeTestCase):
         """
         users = ugm_backend.ugm.users
 
-        register_device_token_for_user("donald", "123456")
-        self.assertTrue("123456" in get_device_tokens_for_user("donald"))
+        register_device_token_for_user("donald", EXAMPLE_DEVICE_TOKEN)
+        self.assertTrue(EXAMPLE_DEVICE_TOKEN in get_device_tokens_for_user("donald"))
+
+    def test_send_message(self):
+        registration_token = EXAMPLE_DEVICE_TOKEN
+        message = fbmessaging.Message(
+            data={
+                'score': '850',
+                'time': '2:45',
+            },
+            token=registration_token,
+        )
+        res = fbmessaging.send(message, dry_run=True)
+        assert res == 'projects/willholzen-293208/messages/0:1612781129630326%d758af2bf9fd7ecd'
+
+    def test_send_multicast_message(self):
+        registration_tokens = [EXAMPLE_DEVICE_TOKEN]
+        message = fbmessaging.MulticastMessage(
+            data={'score': '850', 'time': '2:45'},
+            tokens=registration_tokens,
+        )
+        res = fbmessaging.send_multicast(message)
+
+    def test_send_message_to_user(self):
+        data = {'score': '850', 'time': '2:45'}
+        res = messaging.send_message_to_user("donald", data)
+        assert res.success_count == 1
 
 
 def run_tests():
