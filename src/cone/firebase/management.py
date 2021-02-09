@@ -128,6 +128,24 @@ def register_device_token_for_user(login: str, token: str):
         user.attrs[FIREBASE_DEVICE_TOKENS] = list(tokens) + [token]
 
 
+def unregister_device_token_for_user(login: str, token: str):
+    """
+    registers a device token for a given user
+    :param login: email or uid
+    :param token: firebase device token
+    """
+    users = ugm_backend.ugm.users
+    if login not in users:
+        uid = users.id_for_login(login)
+    else:
+        uid = login
+
+    user = users[uid]
+    tokens = user.attrs.get(FIREBASE_DEVICE_TOKENS, []) or []
+    if token  in tokens:
+        user.attrs[FIREBASE_DEVICE_TOKENS] = [tok for tok in tokens if token != tok]
+
+
 def get_device_tokens_for_user(login: str) -> List[str]:
     users = ugm_backend.ugm.users
     if login not in users:

@@ -19,6 +19,7 @@ import unittest
 EXAMPLE_DEVICE_TOKEN = "dtt9cGrcSXicn8mW0tvcTQ:APA91bHlcidOIQwXoXVa3p22fBDvgeu1kUwElEKpdVcliODGAbtjviOV7Ruls2h__enWF1P_gZApIVOOfHKGlTft0vWuzzwGapsXbZIIH9s7-rbpilV4Hu_JzoLBYAwpCoP3Nkf3foPv"
 
 from cone.firebase.management import FIREBASE_DEVICE_TOKENS
+
 service_account_json = {
     'auth_provider_x509_cert_url': 'https://www.googleapis.com/oauth2/v1/certs',
     'auth_uri': 'https://accounts.google.com/o/oauth2/auth',
