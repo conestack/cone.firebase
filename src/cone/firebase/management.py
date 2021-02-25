@@ -154,4 +154,4 @@ def get_device_tokens_for_user(login: str) -> List[str]:
         uid = login
 
     user = users[uid]
-    return user.attrs.get(FIREBASE_DEVICE_TOKENS, [])
+    return user.attrs.get(FIREBASE_DEVICE_TOKENS, []) or []
