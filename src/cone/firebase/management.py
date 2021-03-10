@@ -142,7 +142,7 @@ def unregister_device_token_for_user(login: str, token: str):
 
     user = users[uid]
     tokens = user.attrs.get(FIREBASE_DEVICE_TOKENS, []) or []
-    if token  in tokens:
+    if token in tokens:
         user.attrs[FIREBASE_DEVICE_TOKENS] = [tok for tok in tokens if token != tok]
 
 
