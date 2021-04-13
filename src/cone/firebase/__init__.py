@@ -42,24 +42,23 @@ def initialize_firebase_admin():
 
 
 @user_field('firebase_user')
-def age_field_factory(form, label, value):
+def firebase_user_field_factory(form, label, value):
     return factory(
         'field:label:help:error:checkbox',
         value=value,
         props={
             'label': label,
             'datatype': bool,
-            'help': "shall this user be connected to firebase",
+            'help': "shall this user also be managed in Firebase?",
         })
 
 @user_field('fullname')
-def age_field_factory(form, label, value):
+def fullname_field_factory(form, label, value):
     return factory(
         'field:label:error:text',
         value=value,
         props={
             'label': label,
-            'help': "shall this user be connected to firebase?",
             'datatype': str,
             'required': "fullname not given"
         })
