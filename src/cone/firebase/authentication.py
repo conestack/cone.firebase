@@ -66,7 +66,7 @@ class FirebaseAuthenticator:
             if hasattr(users, "on_authenticated"):
                 users.on_authenticated(res["localId"])
             # user.passwd(None, pwd)  # it is to decide if we need local pwds
-            return uid
+            return id
         else:
             # if not found in firebase login locally
             auth = users.authenticate(uid, pwd)
