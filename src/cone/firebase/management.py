@@ -5,6 +5,7 @@ from cone.ugm.events import UserCreatedEvent, UserModifiedEvent, UserDeletedEven
 from firebase_admin import auth
 from firebase_admin.auth import UserNotFoundError
 from pyramid.security import remember
+from yafowil.base import ExtractionError
 from zope.event import classhandler
 import cone.firebase
 
@@ -12,39 +13,53 @@ FIREBASE_DEVICE_TOKENS = "firebase_device_tokens"
 
 
 @classhandler.handler(UserCreatedEvent)
-def on_user_created(event):
+def on_user_created(event: UserCreatedEvent):
     user = event.principal
     email = user.attrs["mail"]
     uid = user.attrs["id"]
-    if email:
-        fullname = user.attrs["fullname"]
-        password = event.password
+    # if firebase_user checkbox is not installed, we want to add all users to FB
+    if "firebase_user" not in user.attrs or user.attrs["firebase_user"]:
+        if email:
+            user_record = create_firebase_user(user, event.password)
+            cone.firebase.logger.info(f"user {uid} added to firebase with email {email} -> {user_record.__dict__}")
+        else:
+            cone.firebase.logger.warn(f"user {uid} has no email -> not added to firebase")
 
-        user_record = auth.create_user(
-            uid=uid,
-            email=email,
-            # phone_number='+15555550100',
-            # email_verified=True,
-            password=password,
-            display_name=fullname,
-            # photo_url='http://www.example.com/12345678/photo.png',
-            disabled=False
-        )
-        cone.firebase.logger.info(f"user {uid} added to firebase with email {email} -> {user_record.__dict__}")
-    else:
-        cone.firebase.logger.warn(f"user {uid} has no email -> not added to firebase")
+
+def create_firebase_user(user, password):
+    fullname = user.attrs["fullname"]
+    user_record = auth.create_user(
+        uid=user.attrs["id"],
+        email=user.attrs["mail"],
+        # phone_number='+15555550100',
+        # email_verified=True,
+        password=password,
+        display_name=fullname,
+        # photo_url='http://www.example.com/12345678/photo.png',
+        disabled=False
+    )
+    return user_record
 
 
 @classhandler.handler(UserModifiedEvent)
-def on_user_modified(event):
+def on_user_modified(event: UserModifiedEvent):
     user = event.principal
     email = user.attrs["mail"]
     uid = user.attrs["id"]
     try:
         fbuser = auth.get_user(uid)
     except UserNotFoundError:
-        fbuser = None
-        cone.firebase.logger.warn(f"user wth id {uid} not found in firebase")
+        # user does not exist in firebase, lets push it to fb, the password has to be specified by hand, otherwise the
+        # hashed password will be set in fb!
+        if user.attrs.get("firebase_user", False):
+            cone.firebase.logger.warn(f"user wth id {uid} not found in firebase, creating it in fb")
+            if not user.attrs["fullname"]:
+                raise ExtractionError("Fullname not given")
+            fbuser = create_firebase_user(user, event.password)
+            cone.firebase.logger.warn(f"created user wth id {uid} in fb")
+        else:
+            fbuser = None
+            cone.firebase.logger.warn(f"user wth id {uid} not found in firebase")
 
     if email and fbuser:
         fullname = user.attrs["fullname"]

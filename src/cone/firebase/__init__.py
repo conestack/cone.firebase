@@ -5,6 +5,8 @@ import firebase_admin
 import json
 import logging
 
+from cone.ugm.browser.principal import user_field
+from yafowil.base import factory
 
 logger = logging.getLogger('cone.firebase')
 
@@ -37,6 +39,30 @@ def initialize_firebase_admin():
     if not firebase_admin._apps:
         firebase_admin.initialize_app(cred)
 
+
+
+@user_field('firebase_user')
+def age_field_factory(form, label, value):
+    return factory(
+        'field:label:help:error:checkbox',
+        value=value,
+        props={
+            'label': label,
+            'datatype': bool,
+            'help': "shall this user be connected to firebase",
+        })
+
+@user_field('fullname')
+def age_field_factory(form, label, value):
+    return factory(
+        'field:label:error:text',
+        value=value,
+        props={
+            'label': label,
+            'help': "shall this user be connected to firebase?",
+            'datatype': str,
+            'required': "fullname not given"
+        })
 
 @main_hook
 def initialize_firebase(config, global_config, settings):

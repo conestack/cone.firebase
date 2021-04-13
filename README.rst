@@ -41,6 +41,21 @@ Adopt your application config ini file to define firebase related API keys.
     firebase.web_api_key = xxx
     firebase.service_account_json_file = path/to/service_account.json
 
+also in your ugm.xml you can optionally add the `firebase_user` checkbox:
+
+.. code-block:: xml
+
+    <users_form_attrmap>
+        ...
+        <elem>
+            <key>firebase_user</key>
+            <value>Firebase User</value>
+        </elem>
+    </users_form_attrmap>
+
+When you want to upgrade an existing user to FB, you can do this by checking
+`firebase_user` in the user edit form, butt attention: you have to manually
+enter the password since the firebase API expects the password in cleartext.
 
 Contributors
 ============
