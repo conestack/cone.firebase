@@ -17,8 +17,8 @@ install:
         pip install repoze.zcml==1.1
         pip install repoze.workflow==1.1
     fi
-  - pip install https://github.com/bluedynamics/cone.ugm/archive/master.zip
-  - pip install https://github.com/bluedynamics/cone.app/archive/master.zip
+  - pip install https://github.com/conestack/cone.ugm/archive/master.zip
+  - pip install https://github.com/conestack/cone.app/archive/master.zip
   - pip install -e .[test]
 
 script:
