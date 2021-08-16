@@ -7,10 +7,14 @@ from cone.firebase.api import get_device_tokens_for_user
 from cone.firebase.api import register_device_token_for_user
 from cone.firebase.testing import firebase_admin
 from cone.firebase.testing.firebase_admin import messaging as fb_fake_messaging
+from cone.ugm.events import UserCreatedEvent
+from cone.ugm.events import UserDeletedEvent
+from cone.ugm.events import UserModifiedEvent
 from cone.ugm.testing import localmanager_config
 from cone.ugm.testing import ugm_config
 from cone.ugm.testing import UGMLayer
 from node.tests import NodeTestCase
+from zope.event import classhandler
 import json
 import os
 import shutil
@@ -108,6 +112,7 @@ class FirebaseLayer(UGMLayer):
 
     def tearDown(self):
         self.unpatch_modules()
+        self.unregister_handlers()
         super(FirebaseLayer, self).tearDown()
         shutil.rmtree(self.tempdir)
         firebase_admin.delete_user("donald")
@@ -125,6 +130,11 @@ class FirebaseLayer(UGMLayer):
         firebase.firebase_admin = self.firebase_admin_orgin
         api.firebase_admin = self.firebase_admin_orgin
         authentication.sign_in_with_email_and_password = self.sign_in_with_email_and_password
+
+    def unregister_handlers(self):
+        del classhandler.registry[UserCreatedEvent]
+        del classhandler.registry[UserDeletedEvent]
+        del classhandler.registry[UserModifiedEvent]
 
 
 class TestFirebase(NodeTestCase):
