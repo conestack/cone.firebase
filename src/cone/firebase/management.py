@@ -1,13 +1,16 @@
-from typing import Tuple, List
-
 from cone.app import ugm_backend
-from cone.ugm.events import UserCreatedEvent, UserModifiedEvent, UserDeletedEvent
+from cone.ugm.events import UserCreatedEvent
+from cone.ugm.events import UserDeletedEvent
+from cone.ugm.events import UserModifiedEvent
 from firebase_admin import auth
 from firebase_admin.auth import UserNotFoundError
 from pyramid.security import remember
+from typing import List
+from typing import Tuple
 from yafowil.base import ExtractionError
 from zope.event import classhandler
 import cone.firebase
+
 
 FIREBASE_DEVICE_TOKENS = "firebase_device_tokens"
 

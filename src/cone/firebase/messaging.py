@@ -4,21 +4,23 @@ Firebase Messaging with cone
 docs see:
 https://firebase.google.com/docs/cloud-messaging/send-message
 """
-from typing import List, Dict, Any
-import logging
-import firebase_admin
-from firebase_admin import messaging
 from cone.app import ugm_backend
-from cone.firebase.management import get_device_tokens_for_user, unregister_device_token_for_user
+from cone.firebase.management import get_device_tokens_for_user
+from cone.firebase.management import unregister_device_token_for_user
+from firebase_admin import messaging
 from firebase_admin.exceptions import InvalidArgumentError
 from firebase_admin.messaging import UnregisteredError
+from typing import Any
+from typing import Dict
+from typing import List
+import firebase_admin
+import logging
+
 
 logger = logging.getLogger('cone.firebase')
 
-def send_message(data: Dict[str, Any], token: str) -> str:
-    """
 
-    """
+def send_message(data: Dict[str, Any], token: str) -> str:
     messaging = firebase_admin.messaging
     message = messaging.Message(data=data, token=token)
     response = messaging.send(message)
