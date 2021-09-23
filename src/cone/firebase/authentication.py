@@ -1,9 +1,11 @@
+from cone.app import security
+from cone.app import ugm_backend
+from cone.app.interfaces import IAuthenticator
+from zope.interface import implementer
+import cone.firebase
 import json
 import requests
-from zope.interface import implementer
-from cone.app.interfaces import IAuthenticator
-from cone.app import ugm_backend, security
-import cone.firebase
+
 
 REST_API_URL_LOGIN = f"https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword"
 
@@ -34,7 +36,7 @@ def sign_in_with_email_and_password(email, password, api_key, return_secure_toke
 @implementer(IAuthenticator)
 class FirebaseAuthenticator:
 
-    @classmethod 
+    @classmethod
     def authenticate(cls, uid: str, pwd: str) -> str:
         """
         does firebase authentication and in the case of success

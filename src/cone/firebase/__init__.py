@@ -1,12 +1,12 @@
 from cone.app import main_hook
 from cone.app.interfaces import IAuthenticator
 from cone.firebase.authentication import FirebaseAuthenticator
+from cone.ugm.browser.principal import user_field
+from yafowil.base import factory
 import firebase_admin
 import json
 import logging
 
-from cone.ugm.browser.principal import user_field
-from yafowil.base import factory
 
 logger = logging.getLogger('cone.firebase')
 
@@ -40,7 +40,6 @@ def initialize_firebase_admin():
         firebase_admin.initialize_app(cred)
 
 
-
 @user_field('firebase_user')
 def firebase_user_field_factory(form, label, value):
     return factory(
@@ -51,6 +50,7 @@ def firebase_user_field_factory(form, label, value):
             'datatype': bool,
             'help': "shall this user also be managed in Firebase?",
         })
+
 
 @user_field('fullname')
 def fullname_field_factory(form, label, value):
@@ -63,8 +63,13 @@ def fullname_field_factory(form, label, value):
             'required': "fullname not given"
         })
 
+
 @main_hook
 def initialize_firebase(config, global_config, settings):
     load_firebase_config(settings)
     initialize_firebase_admin()
-    config.registry.registerUtility(FirebaseAuthenticator, IAuthenticator, "firebase")
+    config.registry.registerUtility(
+        FirebaseAuthenticator,
+        IAuthenticator,
+        'firebase'
+    )

@@ -1,14 +1,20 @@
 from cone import firebase
+from cone.app.ugm import ugm_backend
 from cone.firebase import api
-from cone.firebase.api import register_device_token_for_user, get_device_tokens_for_user, send_message_to_user
+from cone.firebase import authentication
+from cone.firebase import messaging
+from cone.firebase.api import get_device_tokens_for_user
+from cone.firebase.api import register_device_token_for_user
 from cone.firebase.testing import firebase_admin
 from cone.firebase.testing.firebase_admin import messaging as fb_fake_messaging
-from cone.firebase import messaging
-
-from cone.firebase import authentication
-from cone.ugm.testing import UGMLayer, ugm_config, localmanager_config
-from cone.app.ugm import ugm_backend
+from cone.ugm.events import UserCreatedEvent
+from cone.ugm.events import UserDeletedEvent
+from cone.ugm.events import UserModifiedEvent
+from cone.ugm.testing import localmanager_config
+from cone.ugm.testing import ugm_config
+from cone.ugm.testing import UGMLayer
 from node.tests import NodeTestCase
+from zope.event import classhandler
 import json
 import os
 import shutil
@@ -16,9 +22,9 @@ import sys
 import tempfile
 import unittest
 
+
 EXAMPLE_DEVICE_TOKEN = "dtt9cGrcSXicn8mW0tvcTQ:APA91bHlcidOIQwXoXVa3p22fBDvgeu1kUwElEKpdVcliODGAbtjviOV7Ruls2h__enWF1P_gZApIVOOfHKGlTft0vWuzzwGapsXbZIIH9s7-rbpilV4Hu_JzoLBYAwpCoP3Nkf3foPv"
 
-from cone.firebase.management import FIREBASE_DEVICE_TOKENS
 
 service_account_json = {
     'auth_provider_x509_cert_url': 'https://www.googleapis.com/oauth2/v1/certs',
@@ -33,18 +39,27 @@ service_account_json = {
     'type': 'service_account'
 }
 
-def fake_sign_in_with_email_and_password(email, password, api_key, return_secure_token = True):
+
+def fake_sign_in_with_email_and_password(email, password, api_key,
+                                         return_secure_token=True):
     try:
         res = firebase_admin.get_user_by_email(email)
         res["kind"] = 'identitytoolkit#VerifyPasswordResponse'
     except KeyError:
-        res = {'error': {'code': 400,
-            'message': 'INVALID_EMAIL',
-            'errors': [{'message': 'INVALID_EMAIL',
-                'domain': 'global',
-                'reason': 'invalid'}]}}
+        res = {
+            'error': {
+                'code': 400,
+                'message': 'INVALID_EMAIL',
+                'errors': [{
+                    'message': 'INVALID_EMAIL',
+                    'domain': 'global',
+                    'reason': 'invalid'
+                }]
+            }
+        }
 
     return res
+
 
 class FirebaseLayer(UGMLayer):
 
@@ -76,7 +91,6 @@ class FirebaseLayer(UGMLayer):
 
         ugm_backend.initialize()
 
-
     def setUp(self, args=None):
         self.patch_modules()
         self.tempdir = tempfile.mkdtemp()
@@ -88,16 +102,17 @@ class FirebaseLayer(UGMLayer):
         # create a local only user
         users = ugm_backend.ugm.users
         users.create(
-                    "donald_local",
-                    login="email",
-                    email="donald_local@duck.com",
-                    fullname="Donald Duck local",
-                )
+            "donald_local",
+            login="email",
+            email="donald_local@duck.com",
+            fullname="Donald Duck local",
+        )
         users["donald_local"].passwd(None, "daisy1")
         assert "donald_local" in users
 
     def tearDown(self):
         self.unpatch_modules()
+        self.unregister_handlers()
         super(FirebaseLayer, self).tearDown()
         shutil.rmtree(self.tempdir)
         firebase_admin.delete_user("donald")
@@ -116,6 +131,11 @@ class FirebaseLayer(UGMLayer):
         api.firebase_admin = self.firebase_admin_orgin
         authentication.sign_in_with_email_and_password = self.sign_in_with_email_and_password
 
+    def unregister_handlers(self):
+        del classhandler.registry[UserCreatedEvent]
+        del classhandler.registry[UserDeletedEvent]
+        del classhandler.registry[UserModifiedEvent]
+
 
 class TestFirebase(NodeTestCase):
     layer = FirebaseLayer()
@@ -129,23 +149,20 @@ class TestFirebase(NodeTestCase):
         )
 
     def test_firebase_authentication(self):
-        """
-        Tests a login situation where only a firebase user
-        exists and after authentication is added to the
-        local UGM database
+        """Tests a login situation where only a firebase user exists and after
+        authentication is added to the local UGM database.
         """
         from cone.app import security
         users = ugm_backend.ugm.users
         request = self.layer.new_request()
         security.AUTHENTICATOR = "firebase"
-        aut = security.authenticate(request, "donald@duck.com", "daisy1")
+        security.authenticate(request, "donald@duck.com", "daisy1")
 
         # during the authentication the user should be added to UGM
         self.assertTrue("donald" in users)
 
     def test_local_authentication(self):
-        """
-        Tests a local only login for the situation that a certain user is
+        """Tests a local only login for the situation that a certain user is
         only given locally and login should the fall back to standard auth
         """
         from cone.app import security
@@ -154,14 +171,11 @@ class TestFirebase(NodeTestCase):
 
         request = self.layer.new_request()
         security.AUTHENTICATOR = "firebase"
-        aut = security.authenticate(request, "donald_local", "daisy1")
+        security.authenticate(request, "donald_local", "daisy1")
 
     def test_management(self):
+        """Test management of device tokens for firebase messaging
         """
-        test management of device tokens for firebase messaging
-        """
-        users = ugm_backend.ugm.users
-
         register_device_token_for_user("donald", EXAMPLE_DEVICE_TOKEN)
         self.assertTrue(EXAMPLE_DEVICE_TOKEN in get_device_tokens_for_user("donald"))
 
@@ -183,12 +197,12 @@ class TestFirebase(NodeTestCase):
             data={'score': '850', 'time': '2:45'},
             tokens=registration_tokens,
         )
-        res = fb_fake_messaging.send_multicast(message)
+        fb_fake_messaging.send_multicast(message)
 
     def test_send_message_to_user(self):
         data = {'score': '850', 'time': '2:45'}
         res = messaging.send_message_to_user("donald", data)
-        assert res.success_count == 1
+        self.assertTrue(res[0].startswith('projects/willholzen-293208/messages/'))
 
 
 def run_tests():
