@@ -125,7 +125,7 @@ def authenticate_with_id_token(request, id_token: str) -> Tuple[str, str]:
     return user_id, remember(request, user_id)
 
 
-def register_device_token_for_user(login: str, token: str):
+def register_device_token_for_user(login: str, token: str) -> List[str]:
     """
     registers a device token for a given user
     :param login: email or uid
@@ -141,6 +141,8 @@ def register_device_token_for_user(login: str, token: str):
     tokens = user.attrs.get(FIREBASE_DEVICE_TOKENS, []) or []
     if token not in tokens:
         user.attrs[FIREBASE_DEVICE_TOKENS] = list(tokens) + [token]
+
+    return user.attrs[FIREBASE_DEVICE_TOKENS]
 
 
 def unregister_device_token_for_user(login: str, token: str):
