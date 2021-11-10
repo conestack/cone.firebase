@@ -52,6 +52,18 @@ def firebase_user_field_factory(form, label, value):
         })
 
 
+@user_field('email_verified')
+def email_verified(form, label, value):
+    return factory(
+        'field:label:help:error:checkbox',
+        value=value,
+        props={
+            'label': label,
+            'datatype': bool,
+            'help': "is user verified by email?",
+        })
+
+
 @user_field('fullname')
 def fullname_field_factory(form, label, value):
     return factory(
