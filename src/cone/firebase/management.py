@@ -41,6 +41,7 @@ def create_firebase_user(user, password):
         # photo_url='http://www.example.com/12345678/photo.png',
         disabled=False
     )
+    user.attrs["login"] = "mail"
     return user_record
 
 

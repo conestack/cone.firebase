@@ -217,5 +217,15 @@ def run_tests():
     sys.exit(int(runner.failed))
 
 
+# def test_run_tests():
+#     from cone.firebase import tests
+#     from zope.testrunner.runner import Runner
+#
+#     suite = unittest.TestSuite()
+#     suite.addTest(unittest.findTestCases(tests))
+#
+#     runner = Runner(found_suites=[suite])
+#     runner.run()
+#
 if __name__ == '__main__':
     run_tests()
