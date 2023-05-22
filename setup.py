@@ -46,6 +46,7 @@ setup(
     include_package_data=True,
     zip_safe=False,
     install_requires=[
+        'proto-plus==1.18.1',
         'google-api-core==1.26.3',
         'google-api-python-client==2.2.0',
         'google-auth==1.29.0',
