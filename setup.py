@@ -49,7 +49,8 @@ setup(
         'setuptools',
         'cone.app',
         'requests',
-        'firebase_admin==4.5.3'
+        'firebase_admin==4.5.3',
+        'protobuf==3.15.8'
     ],
     extras_require=dict(test=['zope.testrunner']),
     tests_require=['zope.testrunner'],
