@@ -1,4 +1,12 @@
+.coverage
 *.pyc
 /.eggs/
+/.mxmake/
+/.venv/
+/constraints-mxdev.txt
+/coverage/
 /dist/
+/requirements-mxdev.txt
+/sources/
 /src/cone.firebase.egg-info/
+/venv/

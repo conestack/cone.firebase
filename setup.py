@@ -1,6 +1,5 @@
 from setuptools import find_packages
 from setuptools import setup
-from setuptools.command.test import test
 import os
 
 
@@ -16,13 +15,6 @@ longdesc = '\n\n'.join([read_file(name) for name in [
     'CHANGES.rst',
     'LICENSE.rst'
 ]])
-
-
-class Test(test):
-
-    def run_tests(self):
-        from cone.firebase import tests
-        tests.run_tests()
 
 
 setup(
@@ -61,12 +53,14 @@ setup(
         'googleapis-common-protos==1.53.0',
 
         'setuptools',
-        'cone.app',
+        'cone.app[lxml]>=1.0.3',
         'requests',
         'firebase_admin==4.5.3',
         # 'protobuf==3.15.8'
     ],
-    extras_require=dict(test=['zope.testrunner']),
-    tests_require=['zope.testrunner'],
-    cmdclass=dict(test=Test)
+    extras_require=dict(
+    test=[
+        'pytest',
+        'zope.pytestlayer'
+    ])
 )
