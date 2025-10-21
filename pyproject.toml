@@ -1,0 +1,56 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "cone.firebase"
+version = "0.1.dev0"
+description = "Firebase integration for cone.app"
+readme = "README.rst"
+license = {text = "Simplified BSD"}
+authors = [{name = "Cone Contributors", email = "dev@conestack.org"}]
+keywords = ["node", "pyramid", "cone", "web"]
+classifiers = [
+    "Environment :: Web Environment",
+    "Programming Language :: Python",
+    "Topic :: Internet :: WWW/HTTP :: Dynamic Content",
+]
+dependencies = [
+    "proto-plus==1.18.1",
+    "google-api-core==1.26.3",
+    "google-api-python-client==2.2.0",
+    "google-auth==1.29.0",
+    "google-auth-httplib2==0.1.0",
+    "google-auth-oauthlib==0.4.6",
+    "google-cloud-core==1.6.0",
+    "google-cloud-firestore==2.1.0",
+    "google-cloud-storage==1.37.1",
+    "google-crc32c==1.1.2",
+    "google-pasta==0.2.0",
+    "google-resumable-media==1.2.0",
+    "googleapis-common-protos==1.53.0",
+    "cone.app",
+    "requests",
+    "firebase_admin==4.5.3",
+    "protobuf==3.15.8",
+]
+
+[project.optional-dependencies]
+test = [
+    "zope.testrunner",
+]
+
+[project.urls]
+Homepage = "http://github.com/conestack/cone.firebase"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools]
+zip-safe = false
+
+[tool.setuptools.package-dir]
+"" = "src"
+
+[tool.zest-releaser]
+create-wheel = true

@@ -2,3 +2,4 @@
 /.eggs/
 /dist/
 /src/cone.firebase.egg-info/
+/build
