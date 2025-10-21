@@ -43,5 +43,8 @@ test = [
 [project.urls]
 Homepage = "http://github.com/conestack/cone.firebase"
 
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/cone"]
 [tool.zest-releaser]
 create-wheel = true
