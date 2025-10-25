@@ -61,7 +61,7 @@ setup(
         'googleapis-common-protos==1.53.0',
 
         'setuptools',
-        'cone.app',
+        'cone.app<1.1.0',
         'requests',
         'firebase_admin==4.5.3',
         # 'protobuf==3.15.8'
