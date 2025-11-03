@@ -34,7 +34,7 @@ dependencies = [
     "google-pasta==0.2.0",
     "google-resumable-media==1.2.0",
     "googleapis-common-protos==1.53.0",
-    "cone.app",
+    "cone.ugm",
     "requests",
     "firebase_admin==4.5.3",
     "protobuf==3.15.8",
@@ -42,7 +42,9 @@ dependencies = [
 
 [project.optional-dependencies]
 test = [
-    "zope.testrunner",
+    "cone.app[test]",
+    "pytest",
+    "zope.pytestlayer",
 ]
 
 [project.urls]

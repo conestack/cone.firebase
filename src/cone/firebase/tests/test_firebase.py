@@ -6,8 +6,6 @@ from cone.firebase.api import get_device_tokens_for_user
 from cone.firebase.api import register_device_token_for_user
 from cone.firebase.testing.firebase_admin import messaging as fb_fake_messaging
 from node.tests import NodeTestCase
-import sys
-import unittest
 
 
 EXAMPLE_DEVICE_TOKEN = (
@@ -83,30 +81,3 @@ class TestFirebase(NodeTestCase):
         data = {'score': '850', 'time': '2:45'}
         res = messaging.send_message_to_user("donald", data)
         self.assertTrue(res[0].startswith('projects/willholzen-293208/messages/'))
-
-
-def run_tests():
-    from cone.firebase import tests
-    from zope.testrunner.runner import Runner
-
-    suite = unittest.TestSuite()
-    suite.addTest(unittest.findTestCases(tests))
-
-    runner = Runner(found_suites=[suite])
-    runner.run()
-    sys.exit(int(runner.failed))
-
-
-# def test_run_tests():
-#     from cone.firebase import tests
-#     from zope.testrunner.runner import Runner
-#
-#     suite = unittest.TestSuite()
-#     suite.addTest(unittest.findTestCases(tests))
-#
-#     runner = Runner(found_suites=[suite])
-#     runner.run()
-
-
-if __name__ == '__main__':
-    run_tests()

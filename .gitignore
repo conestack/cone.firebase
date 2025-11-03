@@ -1,5 +1,10 @@
+*.egg-info
 *.pyc
+/.coverage
 /.eggs/
+/.mxmake/
+/build/
+/constraints-mxdev.txt
 /dist/
-/src/cone.firebase.egg-info/
-/build
+/requirements-mxdev.txt
+/sources/
