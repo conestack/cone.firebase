@@ -4,6 +4,7 @@
 /.eggs/
 /.mxmake/
 /build/
+/venv/
 /constraints-mxdev.txt
 /dist/
 /requirements-mxdev.txt
