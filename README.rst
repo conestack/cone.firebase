@@ -6,11 +6,9 @@
     :target: https://pypi.python.org/pypi/cone.firebase
     :alt: Number of PyPI downloads
 
-.. image:: https://travis-ci.org/bluedynamics/cone.firebase.svg?branch=master
-    :target: https://travis-ci.org/bluedynamics/cone.firebase
-
-.. image:: https://coveralls.io/repos/github/bluedynamics/cone.firebase/badge.svg?branch=master
-    :target: https://coveralls.io/github/bluedynamics/cone.firebase?branch=master
+.. image:: https://github.com/conestack/cone.firebase/actions/workflows/test.yml/badge.svg
+    :target: https://github.com/conestack/cone.firebase/actions/workflows/test.yml
+    :alt: Test cone.firebase
 
 
 This package provides a firebase integration in to cone.app.
