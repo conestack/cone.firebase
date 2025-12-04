@@ -35,7 +35,7 @@ dependencies = [
     "google-pasta==0.2.0",
     "google-resumable-media==1.2.0",
     "googleapis-common-protos==1.53.0",
-    "cone.ugm>1.0.99,<2.0.0",
+    "cone.ugm>1.0.99",
     "requests",
     "firebase_admin==4.5.3",
     "protobuf==3.15.8",
