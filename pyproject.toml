@@ -22,12 +22,13 @@ classifiers = [
     "Topic :: Internet :: WWW/HTTP :: Dynamic Content",
 ]
 dependencies = [
-    "proto-plus==1.18.1",
+    "cone.ugm>1.0.99",
+    "firebase_admin==4.5.3",
     "google-api-core==1.26.3",
     "google-api-python-client==2.2.0",
-    "google-auth==1.29.0",
     "google-auth-httplib2==0.1.0",
     "google-auth-oauthlib==0.4.6",
+    "google-auth==1.29.0",
     "google-cloud-core==1.6.0",
     "google-cloud-firestore==2.1.0",
     "google-cloud-storage==1.37.1",
@@ -35,10 +36,9 @@ dependencies = [
     "google-pasta==0.2.0",
     "google-resumable-media==1.2.0",
     "googleapis-common-protos==1.53.0",
-    "cone.ugm>1.0.99",
-    "requests",
-    "firebase_admin==4.5.3",
+    "proto-plus==1.18.1",
     "protobuf==3.15.8",
+    "requests",
 ]
 
 [project.optional-dependencies]
