@@ -32,9 +32,6 @@ class Message:
         self.topic = topic
         self.condition = condition
 
-    def __str__(self):
-        return json.dumps(self, cls=MessageEncoder, sort_keys=True)
-
 class MulticastMessage:
     """A message that can be sent to multiple tokens via Firebase Cloud Messaging.
 

@@ -11,13 +11,13 @@ import logging
 logger = logging.getLogger('cone.firebase')
 
 
-class FirebaseConfig(object):
+class FirebaseConfig:
     web_api_key = None
     service_account_json = None
 
     def __init__(self, web_api_key, service_account_json_file):
         self.web_api_key = web_api_key
-        with open(service_account_json_file, 'r') as f:
+        with open(service_account_json_file) as f:
             self.service_account_json = json.loads(f.read())
 
 

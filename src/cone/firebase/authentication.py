@@ -1,4 +1,3 @@
-from cone.app import security
 from cone.app import ugm_backend
 from cone.app.interfaces import IAuthenticator
 from zope.interface import implementer
@@ -7,7 +6,7 @@ import json
 import requests
 
 
-REST_API_URL_LOGIN = f"https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword"
+REST_API_URL_LOGIN = "https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword"
 
 
 def sign_in_with_email_and_password(email, password, api_key, return_secure_token = True):
@@ -22,8 +21,8 @@ def sign_in_with_email_and_password(email, password, api_key, return_secure_toke
             "password": password or "",
             "returnSecureToken": return_secure_token
         })
-    except Exception as ex:
-        cone.firebase.logger.error(f"error encoding email: {email} and password: {password}")
+    except Exception:
+        cone.firebase.logger.error(f"error encoding login data for email: {email}")
         raise
 
     r = requests.post(REST_API_URL_LOGIN,
@@ -64,7 +63,6 @@ class FirebaseAuthenticator:
             # else:
             #    user email aktualisieren
 
-            user = users[id]
             if hasattr(users, "on_authenticated"):
                 users.on_authenticated(res["localId"])
             # user.passwd(None, pwd)  # it is to decide if we need local pwds

@@ -2,9 +2,9 @@ from cone import firebase
 from cone.app.ugm import ugm_backend
 from cone.firebase import api
 from cone.firebase import authentication
+from cone.firebase import management
 from cone.firebase import messaging
 from cone.firebase.testing import firebase_admin
-from cone.firebase.testing.firebase_admin import messaging as fb_fake_messaging
 from cone.ugm.events import UserCreatedEvent
 from cone.ugm.events import UserDeletedEvent
 from cone.ugm.events import UserModifiedEvent
@@ -30,6 +30,13 @@ service_account_json = {
     'token_uri': 'https://oauth2.googleapis.com/token',
     'type': 'service_account'
 }
+
+
+event_handlers = [
+    (UserCreatedEvent, management.on_user_created),
+    (UserModifiedEvent, management.on_user_modified),
+    (UserDeletedEvent, management.on_user_deleted),
+]
 
 
 def fake_sign_in_with_email_and_password(
@@ -86,12 +93,13 @@ class FirebaseLayer(UGMLayer):
 
     def setUp(self, args=None):
         self.patch_modules()
+        self.register_handlers()
         self.tempdir = tempfile.mkdtemp()
         with open(os.path.join(self.tempdir, 'service_account.json'), 'w') as f:
             f.write(json.dumps(service_account_json))
         super(FirebaseLayer, self).setUp()
         # create a firebase only user
-        firebase_admin.create_user(id="donald", login="email", email="donald@duck.com")
+        firebase_admin.create_user(uid="donald", login="email", email="donald@duck.com")
         # create a local only user
         users = ugm_backend.ugm.users
         users.create(
@@ -112,22 +120,32 @@ class FirebaseLayer(UGMLayer):
 
     def patch_modules(self):
         self.firebase_admin_orgin = firebase.firebase_admin
+        self.auth_orgin = management.auth
         firebase.firebase_admin = firebase_admin
-        firebase.firebase_admin.messaging = fb_fake_messaging
         api.firebase_admin = firebase_admin
         messaging.firebase_admin = firebase_admin
+        management.auth = firebase_admin
         self.sign_in_with_email_and_password = authentication.sign_in_with_email_and_password
         authentication.sign_in_with_email_and_password = fake_sign_in_with_email_and_password
 
     def unpatch_modules(self):
         firebase.firebase_admin = self.firebase_admin_orgin
         api.firebase_admin = self.firebase_admin_orgin
+        messaging.firebase_admin = self.firebase_admin_orgin
+        management.auth = self.auth_orgin
         authentication.sign_in_with_email_and_password = self.sign_in_with_email_and_password
 
+    def register_handlers(self):
+        # handlers get registered on import, re-register after a tear down
+        for event_class, handler in event_handlers:
+            if handler not in classhandler.registry.get(event_class, []):
+                classhandler.handler(event_class, handler)
+
     def unregister_handlers(self):
-        del classhandler.registry[UserCreatedEvent]
-        del classhandler.registry[UserDeletedEvent]
-        del classhandler.registry[UserModifiedEvent]
+        # remove only the own handlers, others may be registered for the same
+        # event classes
+        for event_class, handler in event_handlers:
+            classhandler.registry[event_class].remove(handler)
 
 
 firebase_layer = FirebaseLayer()
