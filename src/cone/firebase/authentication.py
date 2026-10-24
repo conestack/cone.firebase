@@ -6,35 +6,36 @@ import json
 import requests
 
 
-REST_API_URL_LOGIN = "https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword"
+REST_API_URL_LOGIN = (
+    'https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword'
+)
 
 
-def sign_in_with_email_and_password(email, password, api_key, return_secure_token = True):
+def sign_in_with_email_and_password(email, password, api_key, return_secure_token=True):
     """
     borrowed from here:
     https://github.com/billydh/python-firebase-admin-sdk-demo/blob/master/sign_in_with_email_and_password.py
     """
 
     try:
-        payload = json.dumps({
-            "email": email or "",
-            "password": password or "",
-            "returnSecureToken": return_secure_token
-        })
+        payload = json.dumps(
+            {
+                'email': email or '',
+                'password': password or '',
+                'returnSecureToken': return_secure_token,
+            }
+        )
     except Exception:
-        cone.firebase.logger.error(f"error encoding login data for email: {email}")
+        cone.firebase.logger.error(f'error encoding login data for email: {email}')
         raise
 
-    r = requests.post(REST_API_URL_LOGIN,
-                      params={"key": api_key},
-                      data=payload)
+    r = requests.post(REST_API_URL_LOGIN, params={'key': api_key}, data=payload)
 
     return r.json()
 
 
 @implementer(IAuthenticator)
 class FirebaseAuthenticator:
-
     @classmethod
     def authenticate(cls, uid: str, pwd: str) -> str:
         """
@@ -49,22 +50,22 @@ class FirebaseAuthenticator:
         ugm = ugm_backend.ugm
         users = ugm.users
 
-        if res.get("kind") == 'identitytoolkit#VerifyPasswordResponse':
-            id = res["localId"]
+        if res.get('kind') == 'identitytoolkit#VerifyPasswordResponse':
+            id = res['localId']
             if id not in users:
                 users.create(
                     id,
-                    login="email",
-                    email=res["email"],
-                    fullname=res.get("displayName"),
-                    registered=res["registered"],
-                    idtoken=res["idToken"]
+                    login='email',
+                    email=res['email'],
+                    fullname=res.get('displayName'),
+                    registered=res['registered'],
+                    idtoken=res['idToken'],
                 )
             # else:
             #    user email aktualisieren
 
-            if hasattr(users, "on_authenticated"):
-                users.on_authenticated(res["localId"])
+            if hasattr(users, 'on_authenticated'):
+                users.on_authenticated(res['localId'])
             # user.passwd(None, pwd)  # it is to decide if we need local pwds
             return id
         else:

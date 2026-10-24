@@ -28,8 +28,7 @@ config = None
 def load_firebase_config(settings):
     global config
     config = FirebaseConfig(
-        settings['firebase.web_api_key'],
-        settings['firebase.service_account_json_file']
+        settings['firebase.web_api_key'], settings['firebase.service_account_json_file']
     )
 
 
@@ -48,8 +47,9 @@ def firebase_user_field_factory(form, label, value):
         props={
             'label': label,
             'datatype': bool,
-            'help': "shall this user also be managed in Firebase?",
-        })
+            'help': 'shall this user also be managed in Firebase?',
+        },
+    )
 
 
 @user_field('email_verified')
@@ -60,8 +60,9 @@ def email_verified(form, label, value):
         props={
             'label': label,
             'datatype': bool,
-            'help': "is user verified by email?",
-        })
+            'help': 'is user verified by email?',
+        },
+    )
 
 
 @user_field('fullname')
@@ -69,19 +70,12 @@ def fullname_field_factory(form, label, value):
     return factory(
         'field:label:error:text',
         value=value,
-        props={
-            'label': label,
-            'datatype': str,
-            'required': "fullname not given"
-        })
+        props={'label': label, 'datatype': str, 'required': 'fullname not given'},
+    )
 
 
 @main_hook
 def initialize_firebase(config, global_config, settings):
     load_firebase_config(settings)
     initialize_firebase_admin()
-    config.registry.registerUtility(
-        FirebaseAuthenticator,
-        IAuthenticator,
-        'firebase'
-    )
+    config.registry.registerUtility(FirebaseAuthenticator, IAuthenticator, 'firebase')

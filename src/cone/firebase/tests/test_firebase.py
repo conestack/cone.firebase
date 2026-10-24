@@ -36,8 +36,7 @@ class TestFirebase(NodeTestCase):
         self.assertIsInstance(firebase.config, firebase.FirebaseConfig)
         self.assertEqual(firebase.config.web_api_key, 'xxxxxxxxxx')
         self.assertEqual(
-            firebase.config.service_account_json,
-            testing.service_account_json
+            firebase.config.service_account_json, testing.service_account_json
         )
 
     def test_firebase_authentication(self):
@@ -45,34 +44,34 @@ class TestFirebase(NodeTestCase):
         authentication is added to the local UGM database.
         """
         from cone.app import security
+
         users = ugm_backend.ugm.users
         request = self.layer.new_request()
         authenticator = security.AUTHENTICATOR
-        security.AUTHENTICATOR = "firebase"
+        security.AUTHENTICATOR = 'firebase'
         try:
-            security.authenticate(request, "donald@duck.com", "daisy1")
+            security.authenticate(request, 'donald@duck.com', 'daisy1')
             # during the authentication the user should be added to UGM
-            self.assertTrue("donald" in users)
+            self.assertTrue('donald' in users)
         finally:
             security.AUTHENTICATOR = authenticator
-            if "donald" in users:
-                del users["donald"]
+            if 'donald' in users:
+                del users['donald']
 
     def test_local_authentication(self):
         """Tests a local only login for the situation that a certain user is
         only given locally and login should the fall back to standard auth
         """
         from cone.app import security
+
         users = ugm_backend.ugm.users
-        self.assertTrue("donald_local" in users)
+        self.assertTrue('donald_local' in users)
 
         request = self.layer.new_request()
         authenticator = security.AUTHENTICATOR
-        security.AUTHENTICATOR = "firebase"
+        security.AUTHENTICATOR = 'firebase'
         try:
-            self.assertTrue(
-                security.authenticate(request, "donald_local", "daisy1")
-            )
+            self.assertTrue(security.authenticate(request, 'donald_local', 'daisy1'))
         finally:
             security.AUTHENTICATOR = authenticator
 
@@ -82,11 +81,10 @@ class TestFirebase(NodeTestCase):
         super().tearDown()
 
     def test_management(self):
-        """Test management of device tokens for firebase messaging
-        """
-        register_device_token_for_user("donald_local", EXAMPLE_DEVICE_TOKEN)
+        """Test management of device tokens for firebase messaging"""
+        register_device_token_for_user('donald_local', EXAMPLE_DEVICE_TOKEN)
         self.assertTrue(
-            EXAMPLE_DEVICE_TOKEN in get_device_tokens_for_user("donald_local")
+            EXAMPLE_DEVICE_TOKEN in get_device_tokens_for_user('donald_local')
         )
 
     def test_send_message(self):
@@ -99,7 +97,10 @@ class TestFirebase(NodeTestCase):
             token=registration_token,
         )
         res = fb_fake_messaging.send(message, dry_run=True)
-        assert res == 'projects/willholzen-293208/messages/0:1612781129630326%d758af2bf9fd7ecd'
+        assert (
+            res
+            == 'projects/willholzen-293208/messages/0:1612781129630326%d758af2bf9fd7ecd'
+        )
 
     def test_send_multicast_message(self):
         registration_tokens = [EXAMPLE_DEVICE_TOKEN]
@@ -110,14 +111,13 @@ class TestFirebase(NodeTestCase):
         fb_fake_messaging.send_multicast(message)
 
     def test_send_message_to_user(self):
-        register_device_token_for_user("donald_local", EXAMPLE_DEVICE_TOKEN)
+        register_device_token_for_user('donald_local', EXAMPLE_DEVICE_TOKEN)
         data = {'score': '850', 'time': '2:45'}
-        res = messaging.send_message_to_user("donald_local", data)
+        res = messaging.send_message_to_user('donald_local', data)
         self.assertTrue(res[0].startswith('projects/willholzen-293208/messages/'))
 
 
 class FakePrincipal:
-
     def __init__(self, **attrs):
         self.attrs = attrs
 
@@ -127,31 +127,26 @@ class TestFirebaseUserFields(NodeTestCase):
 
     def test_firebase_user_field_is_checkbox(self):
         widget = firebase.firebase_user_field_factory(None, 'FB user', True)
-        self.assertEqual(widget.blueprints, [
-            'field', 'label', 'help', 'error', 'checkbox'
-        ])
+        self.assertEqual(
+            widget.blueprints, ['field', 'label', 'help', 'error', 'checkbox']
+        )
         self.assertTrue(widget.getter)
         self.assertEqual(widget.properties['label'], 'FB user')
         self.assertIs(widget.properties['datatype'], bool)
 
     def test_email_verified_field_is_checkbox(self):
         widget = firebase.email_verified(None, 'Verified', False)
-        self.assertEqual(widget.blueprints, [
-            'field', 'label', 'help', 'error', 'checkbox'
-        ])
+        self.assertEqual(
+            widget.blueprints, ['field', 'label', 'help', 'error', 'checkbox']
+        )
         self.assertFalse(widget.getter)
         self.assertEqual(widget.properties['label'], 'Verified')
 
     def test_fullname_field_is_required_text(self):
         widget = firebase.fullname_field_factory(None, 'Fullname', 'Donald')
-        self.assertEqual(widget.blueprints, [
-            'field', 'label', 'error', 'text'
-        ])
+        self.assertEqual(widget.blueprints, ['field', 'label', 'error', 'text'])
         self.assertEqual(widget.getter, 'Donald')
-        self.assertEqual(
-            widget.properties['required'],
-            'fullname not given'
-        )
+        self.assertEqual(widget.properties['required'], 'fullname not given')
 
 
 class TestAuthentication(NodeTestCase):
@@ -170,22 +165,22 @@ class TestAuthentication(NodeTestCase):
         requests.post.assert_called_once_with(
             authentication.REST_API_URL_LOGIN,
             params={'key': 'apikey'},
-            data=json.dumps({
-                'email': 'donald@duck.com',
-                'password': 'daisy1',
-                'returnSecureToken': True
-            })
+            data=json.dumps(
+                {
+                    'email': 'donald@duck.com',
+                    'password': 'daisy1',
+                    'returnSecureToken': True,
+                }
+            ),
         )
 
     def test_sign_in_sends_empty_strings_for_missing_credentials(self):
         with mock.patch.object(authentication, 'requests') as requests:
             self.sign_in(None, None, 'apikey', return_secure_token=False)
         payload = json.loads(requests.post.call_args.kwargs['data'])
-        self.assertEqual(payload, {
-            'email': '',
-            'password': '',
-            'returnSecureToken': False
-        })
+        self.assertEqual(
+            payload, {'email': '', 'password': '', 'returnSecureToken': False}
+        )
 
     def test_sign_in_logs_encoding_error_without_password_and_reraises(self):
         with mock.patch.object(authentication, 'requests') as requests:
@@ -195,7 +190,7 @@ class TestAuthentication(NodeTestCase):
                         'donald@duck.com',
                         'secret',
                         'apikey',
-                        return_secure_token=object()
+                        return_secure_token=object(),
                     )
         requests.post.assert_not_called()
         self.assertEqual(len(logs.output), 1)
@@ -205,19 +200,14 @@ class TestAuthentication(NodeTestCase):
     def test_authenticate_notifies_users_about_firebase_login(self):
         users = ugm_backend.ugm.users
         firebase_admin.create_user(
-            uid='daisy',
-            email='daisy@duck.com',
-            displayName='Daisy Duck'
+            uid='daisy', email='daisy@duck.com', displayName='Daisy Duck'
         )
         try:
             with mock.patch.object(
-                users,
-                'on_authenticated',
-                create=True
+                users, 'on_authenticated', create=True
             ) as on_authenticated:
                 uid = authentication.FirebaseAuthenticator.authenticate(
-                    'daisy@duck.com',
-                    'secret'
+                    'daisy@duck.com', 'secret'
                 )
             self.assertEqual(uid, 'daisy')
             on_authenticated.assert_called_once_with('daisy')
@@ -228,17 +218,11 @@ class TestAuthentication(NodeTestCase):
                 del users['daisy']
 
     def test_authenticate_falls_back_to_local_ugm(self):
-        uid = authentication.FirebaseAuthenticator.authenticate(
-            'donald_local',
-            'daisy1'
-        )
+        uid = authentication.FirebaseAuthenticator.authenticate('donald_local', 'daisy1')
         self.assertEqual(uid, 'donald_local')
 
     def test_authenticate_returns_none_for_invalid_local_credentials(self):
-        uid = authentication.FirebaseAuthenticator.authenticate(
-            'donald_local',
-            'wrong'
-        )
+        uid = authentication.FirebaseAuthenticator.authenticate('donald_local', 'wrong')
         self.assertIsNone(uid)
 
 
@@ -248,10 +232,7 @@ class TestUserEventHandlers(NodeTestCase):
     def test_handlers_are_registered_for_user_events(self):
         registry = classhandler.registry
         self.assertIn(management.on_user_created, registry[UserCreatedEvent])
-        self.assertIn(
-            management.on_user_modified,
-            registry[UserModifiedEvent]
-        )
+        self.assertIn(management.on_user_modified, registry[UserModifiedEvent])
         self.assertIn(management.on_user_deleted, registry[UserDeletedEvent])
 
     def test_handlers_can_be_called_directly(self):
@@ -261,11 +242,7 @@ class TestUserEventHandlers(NodeTestCase):
         self.assertIn('user daisy has no email', logs.output[0])
 
     def test_user_created_creates_firebase_user(self):
-        user = FakePrincipal(
-            id='daisy',
-            mail='daisy@duck.com',
-            fullname='Daisy Duck'
-        )
+        user = FakePrincipal(id='daisy', mail='daisy@duck.com', fullname='Daisy Duck')
         event = UserCreatedEvent(user, password='secret')
         with mock.patch.object(management, 'auth') as auth:
             notify(event)
@@ -274,16 +251,12 @@ class TestUserEventHandlers(NodeTestCase):
             email='daisy@duck.com',
             password='secret',
             display_name='Daisy Duck',
-            disabled=False
+            disabled=False,
         )
         self.assertEqual(user.attrs['login'], 'mail')
 
     def test_user_created_skips_firebase_if_not_firebase_user(self):
-        user = FakePrincipal(
-            id='daisy',
-            mail='daisy@duck.com',
-            firebase_user=False
-        )
+        user = FakePrincipal(id='daisy', mail='daisy@duck.com', firebase_user=False)
         with mock.patch.object(management, 'auth') as auth:
             notify(UserCreatedEvent(user))
         auth.create_user.assert_not_called()
@@ -306,55 +279,37 @@ class TestUserEventHandlers(NodeTestCase):
             fb_user = firebase_admin.get_user(uid)
             self.assertEqual(fb_user.display_name, 'Daisy Duck')
             self.assertFalse(fb_user.disabled)
-            self.assertEqual(
-                firebase_admin.users_by_id[uid]['password'],
-                'secret'
-            )
+            self.assertEqual(firebase_admin.users_by_id[uid]['password'], 'secret')
         finally:
             firebase_admin.delete_user(uid)
 
     def test_user_modified_without_password_keeps_firebase_password(self):
-        user = FakePrincipal(
-            id='daisy',
-            mail='daisy@duck.com',
-            fullname='Daisy Duck'
-        )
+        user = FakePrincipal(id='daisy', mail='daisy@duck.com', fullname='Daisy Duck')
         with mock.patch.object(management, 'auth') as auth:
             notify(UserModifiedEvent(user))
         auth.update_user.assert_called_once_with(
-            'daisy',
-            email='daisy@duck.com',
-            display_name='Daisy Duck',
-            disabled=False
+            'daisy', email='daisy@duck.com', display_name='Daisy Duck', disabled=False
         )
 
     def test_user_modified_creates_missing_firebase_user(self):
         user = FakePrincipal(
-            id='daisy',
-            mail='daisy@duck.com',
-            fullname='Daisy Duck',
-            firebase_user=True
+            id='daisy', mail='daisy@duck.com', fullname='Daisy Duck', firebase_user=True
         )
         with mock.patch.object(management, 'auth') as auth:
             auth.get_user.side_effect = UserNotFoundError('not found')
-            notify(
-                UserModifiedEvent(user, password='secret')
-            )
+            notify(UserModifiedEvent(user, password='secret'))
         auth.create_user.assert_called_once_with(
             uid='daisy',
             email='daisy@duck.com',
             password='secret',
             display_name='Daisy Duck',
-            disabled=False
+            disabled=False,
         )
         auth.update_user.assert_called_once()
 
     def test_user_modified_requires_fullname_for_missing_firebase_user(self):
         user = FakePrincipal(
-            id='daisy',
-            mail='daisy@duck.com',
-            fullname='',
-            firebase_user=True
+            id='daisy', mail='daisy@duck.com', fullname='', firebase_user=True
         )
         with mock.patch.object(management, 'auth') as auth:
             auth.get_user.side_effect = UserNotFoundError('not found')
@@ -363,11 +318,7 @@ class TestUserEventHandlers(NodeTestCase):
         auth.create_user.assert_not_called()
 
     def test_user_modified_ignores_missing_non_firebase_user(self):
-        user = FakePrincipal(
-            id='daisy',
-            mail='daisy@duck.com',
-            fullname='Daisy Duck'
-        )
+        user = FakePrincipal(id='daisy', mail='daisy@duck.com', fullname='Daisy Duck')
         with mock.patch.object(management, 'auth') as auth:
             auth.get_user.side_effect = UserNotFoundError('not found')
             with self.assertLogs('cone.firebase', 'WARNING') as logs:
@@ -396,14 +347,10 @@ class TestUserEventHandlers(NodeTestCase):
     def test_layer_registers_handlers_again_after_unregistering(self):
         self.layer.unregister_handlers()
         self.assertNotIn(
-            management.on_user_created,
-            classhandler.registry[UserCreatedEvent]
+            management.on_user_created, classhandler.registry[UserCreatedEvent]
         )
         self.layer.register_handlers()
-        self.assertIn(
-            management.on_user_created,
-            classhandler.registry[UserCreatedEvent]
-        )
+        self.assertIn(management.on_user_created, classhandler.registry[UserCreatedEvent])
 
 
 class TestAuthenticateWithIdToken(NodeTestCase):
@@ -422,8 +369,7 @@ class TestAuthenticateWithIdToken(NodeTestCase):
             with mock.patch.object(management, 'auth') as auth:
                 auth.verify_id_token.return_value = token_data
                 user_id, headers = management.authenticate_with_id_token(
-                    request,
-                    'id-token'
+                    request, 'id-token'
                 )
             auth.verify_id_token.assert_called_once_with('id-token')
             self.assertEqual(user_id, 'daisy')
@@ -443,10 +389,7 @@ class TestAuthenticateWithIdToken(NodeTestCase):
         with mock.patch.object(management, 'auth') as auth:
             auth.verify_id_token.return_value = {'user_id': 'donald_local'}
             with mock.patch.object(users, 'create') as create:
-                user_id, _ = management.authenticate_with_id_token(
-                    request,
-                    'id-token'
-                )
+                user_id, _ = management.authenticate_with_id_token(request, 'id-token')
         self.assertEqual(user_id, 'donald_local')
         create.assert_not_called()
 
@@ -472,19 +415,11 @@ class TestDeviceTokens(NodeTestCase):
     def test_unregister_device_token_removes_token(self):
         register_device_token_for_user('donald_local', 'token-1')
         register_device_token_for_user('donald_local', 'token-2')
-        management.unregister_device_token_for_user(
-            'donald_local',
-            'token-1'
-        )
-        self.assertEqual(
-            list(get_device_tokens_for_user('donald_local')),
-            ['token-2']
-        )
+        management.unregister_device_token_for_user('donald_local', 'token-1')
+        self.assertEqual(list(get_device_tokens_for_user('donald_local')), ['token-2'])
 
     def test_unregister_device_token_ignores_unknown_login(self):
-        self.assertIsNone(
-            management.unregister_device_token_for_user('unknown', 'token')
-        )
+        self.assertIsNone(management.unregister_device_token_for_user('unknown', 'token'))
 
     def test_device_tokens_of_unknown_user_are_empty(self):
         self.assertEqual(get_device_tokens_for_user('unknown'), [])
@@ -526,15 +461,9 @@ class TestMessaging(NodeTestCase):
 
         with mock.patch.object(fb_fake_messaging, 'send', send):
             with self.assertLogs('cone.firebase', 'ERROR') as logs:
-                res = messaging.send_message_to_user(
-                    'donald_local',
-                    {'score': '850'}
-                )
+                res = messaging.send_message_to_user('donald_local', {'score': '850'})
         self.assertEqual(res, ['sent:valid'])
-        self.assertEqual(
-            list(get_device_tokens_for_user('donald_local')),
-            ['valid']
-        )
+        self.assertEqual(list(get_device_tokens_for_user('donald_local')), ['valid'])
         self.assertEqual(len(logs.output), 2)
 
     def test_send_message_to_user_logs_and_reraises_other_errors(self):
@@ -543,12 +472,6 @@ class TestMessaging(NodeTestCase):
         with mock.patch.object(fb_fake_messaging, 'send', send):
             with self.assertLogs('cone.firebase', 'ERROR') as logs:
                 with self.assertRaises(RuntimeError):
-                    messaging.send_message_to_user(
-                        'donald_local',
-                        {'score': '850'}
-                    )
+                    messaging.send_message_to_user('donald_local', {'score': '850'})
         self.assertIn('message to token token-1 failed', logs.output[0])
-        self.assertEqual(
-            list(get_device_tokens_for_user('donald_local')),
-            ['token-1']
-        )
+        self.assertEqual(list(get_device_tokens_for_user('donald_local')), ['token-1'])

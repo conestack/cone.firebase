@@ -1,5 +1,6 @@
 # Fake api for cloud messaging
 
+
 class Message:
     """A message that can be sent via Firebase Cloud Messaging.
 
@@ -20,8 +21,18 @@ class Message:
         condition: The FCM condition to which the message should be sent (optional).
     """
 
-    def __init__(self, data=None, notification=None, android=None, webpush=None, apns=None,
-                 fcm_options=None, token=None, topic=None, condition=None):
+    def __init__(
+        self,
+        data=None,
+        notification=None,
+        android=None,
+        webpush=None,
+        apns=None,
+        fcm_options=None,
+        token=None,
+        topic=None,
+        condition=None,
+    ):
         self.data = data
         self.notification = notification
         self.android = android
@@ -31,6 +42,7 @@ class Message:
         self.token = token
         self.topic = topic
         self.condition = condition
+
 
 class MulticastMessage:
     """A message that can be sent to multiple tokens via Firebase Cloud Messaging.
@@ -45,11 +57,22 @@ class MulticastMessage:
         apns: An instance of ``messaging.ApnsConfig`` (optional).
         fcm_options: An instance of ``messaging.FCMOptions`` (optional).
     """
-    def __init__(self, tokens, data=None, notification=None, android=None, webpush=None, apns=None,
-                 fcm_options=None):
+
+    def __init__(
+        self,
+        tokens,
+        data=None,
+        notification=None,
+        android=None,
+        webpush=None,
+        apns=None,
+        fcm_options=None,
+    ):
         # _Validators.check_string_list('MulticastMessage.tokens', tokens)
         if len(tokens) > 500:
-            raise ValueError('MulticastMessage.tokens must not contain more than 500 tokens.')
+            raise ValueError(
+                'MulticastMessage.tokens must not contain more than 500 tokens.'
+            )
         self.tokens = tokens
         self.data = data
         self.notification = notification
@@ -113,6 +136,10 @@ def send_multicast(message: Message, dry_run=False):
     return BatchResponse(
         [
             SendResponse(
-                dict(name='projects/willholzen-293208/messages/0:1612781129630326%d758af2bf9fd7ecd'), None)
+                dict(
+                    name='projects/willholzen-293208/messages/0:1612781129630326%d758af2bf9fd7ecd'
+                ),
+                None,
+            )
         ]
     )
